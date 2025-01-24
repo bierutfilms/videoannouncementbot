@@ -9,10 +9,10 @@ const YOUTUBE_CHANNEL_ID = "UCYHad4wPZcAqnVtH9wSbA8g"; // YouTube channel ID to 
 
 // Mapping keywords to Discord channel IDs
 const CHANNEL_KEYWORDS = {
-  "#news": "1313280883297484880/1332423150289555577", // Replace with your Discord channel ID for gaming
-  "legal breakdown": "1313280883297484880/1332428102696964297", // Replace with your Discord channel ID for tutorials
-  "interview:": "1313280883297484880/1332428321178517574", // Replace with your Discord channel ID for vlogs
-  "democracy watch": "1313280883297484880/1332428155268497499",
+  "#news": "1332459667523244102", // Remove the server ID portion before the slash
+  "legal breakdown": "1332428102696964297",
+  "interview:": "1332459912877576263",
+  "democracy watch": "1332459881344798786",
 };
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -20,55 +20,89 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 let lastVideoId = null;
 
 async function checkYouTube() {
-  try {
-    // Fetch the latest video from the YouTube channel
-    const response = await axios.get(
-      `https://www.googleapis.com/youtube/v3/search`,
-      {
-        params: {
-          part: "snippet",
-          channelId: YOUTUBE_CHANNEL_ID,
-          maxResults: 1,
-          order: "date",
-          key: YOUTUBE_API_KEY,
-        },
-      }
-    );
+  try {
+    const response = await axios.get(
+      `https://www.googleapis.com/youtube/v3/search`,
+      {
+        params: {
+          part: "snippet",
+          channelId: YOUTUBE_CHANNEL_ID,
+          maxResults: 1,
+          order: "date",
+          key: YOUTUBE_API_KEY,
+        },
+      }
+    );
 
-    const video = response.data.items[0];
-    if (video && video.id.videoId !== lastVideoId) {
-      lastVideoId = video.id.videoId;
-      const videoDescription = video.snippet.description.toLowerCase(); // Use the video description
-      const videoUrl = `https://www.youtube.com/watch?v=${video.id.videoId}`;
+    // Add response data logging for debugging
+    if (
+      !response.data ||
+      !response.data.items ||
+      response.data.items.length === 0
+    ) {
+      console.log("No videos found or invalid response format:", response.data);
+      return;
+    }
 
-      let matched = false;
+    const video = response.data.items[0];
+    if (video && video.id.videoId !== lastVideoId) {
+      lastVideoId = video.id.videoId;
+      const videoDescription = video.snippet.description.toLowerCase(); // Use the video description
+      const videoUrl = `https://www.youtube.com/watch?v=${video.id.videoId}`;
 
-      // Check the description for keywords and send to the appropriate channel
-      for (const [keyword, channelId] of Object.entries(CHANNEL_KEYWORDS)) {
-        if (videoDescription.includes(keyword)) {
-          // Match keywords
-          const channel = await client.channels.fetch(channelId);
-          await channel.send(`New "${keyword}" video uploaded! ${videoUrl}`);
-          matched = true;
-          break; // Stop after finding the first matching keyword
-        }
-      }
+      let matched = false;
 
-      // Optional: Handle cases where no keyword matches
-      if (!matched) {
-        console.log(`No matching keyword found for video: ${videoUrl}`);
-      }
-    }
-  } catch (error) {
-    console.error("Error fetching YouTube data:", error);
-  }
+      // Check the description for keywords and send to the appropriate channel
+      for (const [keyword, channelId] of Object.entries(CHANNEL_KEYWORDS)) {
+        if (videoDescription.includes(keyword)) {
+          try {
+            const channel = await client.channels.fetch(channelId);
+            if (!channel) {
+              console.error(`Channel not found for ID: ${channelId}`);
+              continue;
+            }
+            await channel.send(`New "${keyword}" video uploaded! ${videoUrl}`);
+            matched = true;
+            break; // Stop after finding the first matching keyword
+          } catch (error) {
+            console.error(
+              `Error sending message to channel ${channelId}:`,
+              error.message
+            );
+            continue;
+          }
+        }
+      }
+
+      // Optional: Handle cases where no keyword matches
+      if (!matched) {
+        console.log(`No matching keyword found for video: ${videoUrl}`);
+      }
+    }
+  } catch (error) {
+    // Enhanced error logging
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.error("YouTube API Error:");
+      console.error("Status:", error.response.status);
+      console.error("Data:", error.response.data);
+      console.error("Headers:", error.response.headers);
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error("No response received:", error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error("Error setting up request:", error.message);
+    }
+  }
 }
 
 client.once("ready", () => {
-  console.log(`Logged in as ${client.user.tag}!`);
+  console.log(`Logged in as ${client.user.tag}!`);
 
-  // Schedule the bot to check YouTube every 10 minutes
-  schedule.scheduleJob("*/1 * * * *", checkYouTube);
+  // Changed to check every 10 minutes instead of every minute
+  schedule.scheduleJob("*/1 * * * *", checkYouTube);
 });
 
 // Log in to Discord
