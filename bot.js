@@ -102,7 +102,7 @@ client.once("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
   // Changed to check every 10 minutes instead of every minute
-  schedule.scheduleJob("*/1 * * * *", checkYouTube);
+  schedule.scheduleJob("*/10 * * * *", checkYouTube);
 });
 
 // Log in to Discord
