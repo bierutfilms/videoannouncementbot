@@ -68,7 +68,7 @@ client.once("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
   // Schedule the bot to check YouTube every 10 minutes
-  schedule.scheduleJob("*/10 * * * *", checkYouTube);
+  schedule.scheduleJob("*/1 * * * *", checkYouTube);
 });
 
 // Log in to Discord
