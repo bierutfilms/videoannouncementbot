@@ -2,6 +2,8 @@ const { Client, GatewayIntentBits } = require("discord.js");
 const axios = require("axios");
 const schedule = require("node-schedule");
 const express = require("express");
+const fs = require("fs");
+const path = require("path");
 
 // Initialize Express
 const app = express();
@@ -10,7 +12,8 @@ const port = process.env.PORT || 3000;
 // Replace these with your actual tokens and IDs
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
-const YOUTUBE_CHANNEL_ID = "UCQANb2YPwAtK-IQJrLaaUFw"; // YouTube channel ID to monitor
+const YOUTUBE_CHANNEL_ID = "UCYHad4wPZcAqnVtH9wSbA8g"; // YouTube channel ID to monitor
+const LAST_VIDEO_FILE = path.join(__dirname, "lastVideo.json");
 
 // Mapping keywords to Discord channel IDs
 const CHANNEL_KEYWORDS = {
@@ -22,7 +25,16 @@ const CHANNEL_KEYWORDS = {
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
+// Initialize lastVideoId from file
 let lastVideoId = null;
+try {
+  if (fs.existsSync(LAST_VIDEO_FILE)) {
+    const data = JSON.parse(fs.readFileSync(LAST_VIDEO_FILE, "utf8"));
+    lastVideoId = data.lastVideoId;
+  }
+} catch (error) {
+  console.error("Error reading last video file:", error);
+}
 
 async function checkYouTube() {
   try {
@@ -51,7 +63,10 @@ async function checkYouTube() {
 
     const video = response.data.items[0];
     if (video && video.id.videoId !== lastVideoId) {
+      // Update lastVideoId in memory and save to file
       lastVideoId = video.id.videoId;
+      fs.writeFileSync(LAST_VIDEO_FILE, JSON.stringify({ lastVideoId }));
+
       const videoDescription = video.snippet.description.toLowerCase(); // Use the video description
       const videoUrl = `https://www.youtube.com/watch?v=${video.id.videoId}`;
 
