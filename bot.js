@@ -12,7 +12,7 @@ const port = process.env.PORT || 3000;
 // Replace these with your actual tokens and IDs
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
-const YOUTUBE_CHANNEL_ID = "UCYHad4wPZcAqnVtH9wSbA8g"; // YouTube channel ID to monitor
+const YOUTUBE_CHANNEL_ID = "UCQANb2YPwAtK-IQJrLaaUFw"; // YouTube channel ID to monitor
 const LAST_VIDEO_FILE = path.join(__dirname, "lastVideo.json");
 
 // Mapping keywords to Discord channel IDs
