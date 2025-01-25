@@ -109,7 +109,6 @@ client.once("ready", () => {
 // Log in to Discord
 client.login(DISCORD_TOKEN);
 
-var http = require('http');//create a server object:
 http.createServer(function (req, res) {}).listen(3000, function(){
  console.log("server start at port 3000"); //the server object listens on port 3000
 });
