@@ -14,7 +14,7 @@ const YOUTUBE_CHANNEL_ID = "UCQANb2YPwAtK-IQJrLaaUFw"; // YouTube channel ID to 
 
 // Mapping keywords to Discord channel IDs
 const CHANNEL_KEYWORDS = {
-  "#news:": "1332459667523244102", // Remove the server ID portion before the slash
+  "#news": "1332459667523244102", // Remove the server ID portion before the slash
   "legal breakdown": "1332428102696964297",
   "interview:": "1332459912877576263",
   "democracy watch": "1332459881344798786",
