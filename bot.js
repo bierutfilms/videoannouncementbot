@@ -1,6 +1,7 @@
 const { Client, GatewayIntentBits } = require("discord.js");
 const axios = require("axios");
 const schedule = require("node-schedule");
+const http = require("http");
 
 // Replace these with your actual tokens and IDs
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
@@ -107,3 +108,8 @@ client.once("ready", () => {
 
 // Log in to Discord
 client.login(DISCORD_TOKEN);
+
+var http = require('http');//create a server object:
+http.createServer(function (req, res) {}).listen(3000, function(){
+ console.log("server start at port 3000"); //the server object listens on port 3000
+});
