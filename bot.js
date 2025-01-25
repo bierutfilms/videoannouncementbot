@@ -1,16 +1,20 @@
 const { Client, GatewayIntentBits } = require("discord.js");
 const axios = require("axios");
 const schedule = require("node-schedule");
-const http = require("http");
+const express = require("express");
+
+// Initialize Express
+const app = express();
+const port = process.env.PORT || 3000;
 
 // Replace these with your actual tokens and IDs
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
-const YOUTUBE_CHANNEL_ID = "UCQANb2YPwAtK-IQJrLaaUFw"; // YouTube channel ID to monitor
+const YOUTUBE_CHANNEL_ID = "UCYHad4wPZcAqnVtH9wSbA8g"; // YouTube channel ID to monitor
 
 // Mapping keywords to Discord channel IDs
 const CHANNEL_KEYWORDS = {
-  "#news:": "1332459667523244102", // Remove the server ID portion before the slash
+  "#news": "1332459667523244102", // Remove the server ID portion before the slash
   "legal breakdown": "1332428102696964297",
   "interview:": "1332459912877576263",
   "democracy watch": "1332459881344798786",
@@ -99,16 +103,26 @@ async function checkYouTube() {
   }
 }
 
+// Add basic Express routes
+app.get("/", (req, res) => {
+  res.send("Discord Bot is running!");
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "healthy" });
+});
+
 client.once("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
-  // Changed to check every 10 minutes instead of every minute
-  schedule.scheduleJob("*/10 * * * *", checkYouTube);
+  // Schedule YouTube check every minute
+  schedule.scheduleJob("*/1 * * * *", checkYouTube);
 });
 
 // Log in to Discord
 client.login(DISCORD_TOKEN);
 
-http.createServer(function (req, res) {}).listen(3000, function(){
- console.log("server start at port 3000"); //the server object listens on port 3000
+// Start Express server
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
